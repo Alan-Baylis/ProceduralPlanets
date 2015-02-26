@@ -29,10 +29,15 @@ public class TerrainController : MonoBehaviour {
         blockData = setBlockData;
         Stopwatch timer = new Stopwatch();
 
-        ThreadWork();
-        //StartCoroutine(ThreadWork());
+        //foreach (KeyValuePair<Vector3, int> data in blockData) {
+        //    CheckForAir(data);
+        //}
+        //UpdateMesh();
 
-        UnityEngine.Debug.Log(timer.Elapsed);
+        //ThreadWork();
+        StartCoroutine(ThreadWork());
+
+        //UnityEngine.Debug.Log(timer.Elapsed);
     }
 
     public void UpdateMesh() {
@@ -61,17 +66,15 @@ public class TerrainController : MonoBehaviour {
         newTriangles.Clear();
     }
 
-    public void ThreadWork() {
+    public IEnumerator ThreadWork() {
         int ticks = Environment.TickCount;
 
         foreach (KeyValuePair<Vector3, int> data in blockData) {
-            ThreadPool.QueueUserWorkItem(delegate {
                 CheckForAir(data);
-            });
 
-            if (Environment.TickCount - ticks > 2000) {
+            if (Environment.TickCount - ticks > 4096) {
                 ticks = Environment.TickCount;
-                //yield return null;
+                yield return null;
             }
         }
         UpdateMesh();

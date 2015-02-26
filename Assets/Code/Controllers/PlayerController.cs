@@ -22,6 +22,7 @@ public class PlayerController : MonoBehaviour {
         playerAtEdge.PastTrigger += new PlayerAtEdge(PlayerAtEdge);
         playerChangingChunk.chunkChanged += new PlayerChangingChunk(PlayerChangingChunk);
         facingChunk.ChunkChanged += new FacingChunk(FacingChunkChanged);
+        StartCoroutine(ChangeLoadingDistance());
         StartCoroutine(TryToGrowChunks());
         StartCoroutine(CheckFPS());
     }
@@ -36,18 +37,16 @@ public class PlayerController : MonoBehaviour {
     }
 
     IEnumerator ChangeLoadingDistance() {
-        int chunkCount = Mathf.FloorToInt((loadDistance * 2) / chunkLength);
-        Debug.Log("ChunkCount :" + chunkCount);
-        localChunkPositions = UnityTools.pointsInsideEllipse(new Vector3(chunkCount, chunkCount, chunkCount), 1, new Vector3(chunkLength, chunkLength, chunkLength));
+        localChunkPositions = UnityTools.PointsInsideEllipse(new Vector3(loadDistance, loadDistance, 1), 1, new Vector3(chunkLength, chunkLength, chunkLength));
         yield return null;
     }
 
     IEnumerator CheckFPS() {
         while (true) {
             if (1.0 / Time.deltaTime > 60 && (1.0 / Time.deltaTime) < 90 && loadDistance < 32) {
-                loadDistance += 2;
+                loadDistance += 1;
                 yield return StartCoroutine(ChangeLoadingDistance());
-            } else if (loadDistance > 8) { loadDistance -= 2; }
+            } else if (loadDistance > 8) { loadDistance -= 1; }
             yield return new WaitForSeconds(5.0f);
         }
     }
@@ -68,8 +67,7 @@ public class PlayerController : MonoBehaviour {
         if (master.GetComponent<MasterController>().chunkData.ContainsKey(position)) {
 
             master.GetComponent<MasterController>().chunkData[position].setActive(false);
-            //Debug.Log("TryToDeactivateChunk Passed.");
-        } else { /*Debug.Log("TryToDeactiavteChunk Failed.");*/ }
+        }
     }
 
     //nulled.
@@ -84,7 +82,6 @@ public class PlayerController : MonoBehaviour {
         }
     }
 
-    //nulled.
     IEnumerator TryToGrowChunks() {
         while (true) {
             List<Vector3> chunkCheckPositions = new List<Vector3>();

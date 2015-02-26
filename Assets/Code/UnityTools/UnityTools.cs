@@ -22,40 +22,35 @@ public static class UnityTools {
         return value;
     }
 
-    public static List<Vector3> pointsInsideEllipse(Vector3 radii, int divisor, Vector3 multiplier) {
+    public static List<Vector3> PointsInsideSphere(int radius, int divisor, int multiplier) {
         List<Vector3> values = new List<Vector3>();
-        Vector2 angles = new Vector2(1,1);
-        Debug.Log("PointsInsideEllipse called.");
 
-
-        for (float i = -Mathf.Pow(Mathf.PI * radii.x, 2); i <= Mathf.Pow(Mathf.PI * radii.x, 2); i++) {
-            for (float j = -Mathf.Pow(Mathf.PI * radii.y, 2); j <= Mathf.Pow(Mathf.PI * radii.y, 2); j++) {
-                for (float k = -Mathf.Pow(Mathf.PI * radii.z, 2); k <= Mathf.Pow(Mathf.PI * radii.z, 2); k++) {
-                    values.Add(new Vector3(i, j, k));
-                    Debug.Log("Vale Added :" + new Vector3(i, j, k));
+        for (int i = -radius; i <= radius; i++) {
+            for (int j = -radius; j <= radius; j++) {
+                for (int k = -radius; k <= radius; k++) {
+                    if (i * i + j * j + k * k <= radius * radius) {
+                        values.Add(new Vector3(j * multiplier, k * multiplier, i * multiplier));
+                    }
                 }
             }
         }
 
+        return values;
+    }
 
-            /*
-            for (float i = -((radii.x * Mathf.Cos(angles.x) * Mathf.Sin(angles.y)) / divisor); i <= (radii.x * Mathf.Cos(angles.x) * Mathf.Sin(angles.y)) / divisor; i++) {
-                for (float j = -((radii.y * Mathf.Sin(angles.x) * Mathf.Sin(angles.y)) / divisor); j <= (radii.y * Mathf.Sin(angles.x) * Mathf.Sin(angles.y)) / divisor; j++) {
-                    angles.x = Vector2.Angle(new Vector2(0, 0), new Vector2(i, j));
-                    Debug.Log("Angles.x : " + angles.x);
-                    for (float k = -((radii.z * Mathf.Cos(angles.y)) / divisor); k <= (radii.z * Mathf.Cos(angles.y)) / divisor; k++) {
-                        angles.y = Vector2.Angle(new Vector2(0, 0), new Vector2(j, k));
-                        Debug.Log("Angle.y : " + angles.y);
-                        Vector3 testPos = new Vector3(i*multiplier.x, j*multiplier.y, k*multiplier.z);
-                        if (!values.Contains(testPos)) {
-                            values.Add(testPos);
-                            Debug.Log("Added value: " + new Vector3(i * multiplier.x, j * multiplier.y, k * multiplier.z));
-                        }    
+    public static List<Vector3> PointsInsideEllipse(Vector3 radii, int divisor, Vector3 multiplier) {
+        List<Vector3> values = new List<Vector3>();
+
+        for (float i = -radii.x / divisor; i < radii.x / divisor; i++) {
+            for (float j = -radii.y / divisor; j < radii.y / divisor; j++) {
+                for (float k = -radii.z / divisor; k < radii.z / divisor; k++) {
+                    if (((i / radii.x) * (i / radii.x) + (j / radii.y) * (j / radii.y) + (k / radii.z) * (k / radii.z)) <= 1) {
+                        values.Add(new Vector3(j * multiplier.x, k * multiplier.y, i * multiplier.z));
                     }
                 }
             }
-            */
-            return values;
+        }
+        return values;
     }
 
     public static Vector3 ClosestAngle(Vector3 direction, Vector3[] angles) {
@@ -77,7 +72,7 @@ public static class UnityTools {
         for (float i = -length.x / divisor; i < length.x / divisor; i++) {
             for (float j = -length.y / divisor; j < length.y / divisor; j++) {
                 for (float k = -length.z / divisor; k < length.z / divisor; k++) {
-                    values.Add(new Vector3(j*multiplier.x, k*multiplier.y, i*multiplier.z));
+                    values.Add(new Vector3(j * multiplier.x, k * multiplier.y, i * multiplier.z));
                 }
             }
         }

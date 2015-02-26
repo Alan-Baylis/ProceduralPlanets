@@ -61,9 +61,13 @@ public class ChunkController : MonoBehaviour {
 
             //int blockType = Mathf.RoundToInt(pnng.smoothNoise(i, 2, 1, 1));
             int blockType = 0;
-            if (posiblePosition[i].y <= Mathf.RoundToInt((pnng.smoothNoise(i,1,1,6)))) { blockType = 1; }
-            //Debug.Log(blockType);
             Vector3 thisPosition = posiblePosition[i];
+            thisPosition = transform.position+posiblePosition[i];
+
+            if (thisPosition.y <= Mathf.RoundToInt((pnng.smoothNoise(thisPosition.magnitude,1,1,6)))) { blockType = 1; }
+            //Debug.Log(blockType);
+
+            thisPosition = posiblePosition[i];
 
             if (!blockData.ContainsKey(thisPosition)) {
                 if (transform.TransformPoint(thisPosition).y <= 10 && transform.TransformPoint(thisPosition).y >=-4) {
@@ -79,7 +83,7 @@ public class ChunkController : MonoBehaviour {
                 yield return null;
             } else { frameCount++; }
         }
-        //chunkMesh.GetComponent<TerrainController>().PreGen(blockData, bounds);
+        chunkMesh.GetComponent<TerrainController>().PreGen(blockData, bounds);
     }
     
     // Adds this chunks data to the xml save file.
