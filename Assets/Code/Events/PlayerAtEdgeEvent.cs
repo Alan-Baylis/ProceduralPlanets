@@ -1,14 +1,26 @@
-﻿using System;
+﻿/* Purpose: This class is used for the PlayerAtEdgeEvent.
+ * 
+ * Special Notes: N/A.
+ * 
+ * Author: Devyn Cyphers; Devcon.
+ */
+
+using System;
 using UnityEngine;
 using System.Collections;
 
+// Delegates to use.
 public delegate void PlayerAtEdge(object source, MyEventArgs e);
 
 public class PlayerAtEdgeEvent {
+    
+    // Variables to use.
     public event PlayerAtEdge PastTrigger;
     private Vector3 i;
     private bool atEdge = false;
     private float maxDist = 32;
+
+    // Variable to test the event.
     public Vector3 myValue {
         get { return i; }
         set { 

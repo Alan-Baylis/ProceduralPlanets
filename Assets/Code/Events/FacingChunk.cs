@@ -1,14 +1,24 @@
-﻿using UnityEngine;
+﻿/* Purpose: This class is used for the FacingChunkEvent.
+ * 
+ * Special Notes: N/A.
+ * 
+ * Author: Devyn Cyphers; Devcon.
+ */
+
+using UnityEngine;
 using System.Collections;
 
+// Delegates to use.
 public delegate void FacingChunk(object source, MyEventArgs e);
 
 public class FacingChunkEvent {
 
+    // variables to use.
     public event FacingChunk ChunkChanged;
     private Vector3 facingChunkAngle, lastChunkAngle;
     private bool sameChunk = true;
 
+    // Variable to test the event.
     public Vector3 myValue {
         get { return facingChunkAngle; }
         set {

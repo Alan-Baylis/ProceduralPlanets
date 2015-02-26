@@ -1,4 +1,12 @@
-﻿using UnityEngine;
+﻿/* Purpose: This class takes the blockData dictionary and sets the blockType for each block within the chunk.
+ * It then generates a mesh of all of the surfaces that are visible.
+ * 
+ * Special Notes: N/A.
+ * 
+ * Author: Devyn Cyphers; Devcon.
+ */
+
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -7,6 +15,7 @@ using System;
 
 public class TerrainController : MonoBehaviour {
 
+    // Variables to use.
     private Dictionary<Vector3, int> blockData = new Dictionary<Vector3, int>();
     public List<Vector3> newVertices;
     public List<Vector2> newUV;
@@ -18,8 +27,10 @@ public class TerrainController : MonoBehaviour {
     private MeshRenderer ren;
     public int squareCount = 0;
 
+    // This method takes setBlockData(Dictionary<vector3, int>) as the block data, it also passes along the setBounds(GameObject). This is called to start the class.
     public void PreGen(Dictionary<Vector3, int> setBlockData, GameObject setBounds) {
-        //Debug.Log("TerCont Started. blockData lenght: " + blockData.Count);
+
+        // Set variables.
         mesh = gameObject.GetComponent<MeshFilter>().mesh;
         col = gameObject.GetComponent<MeshCollider>();
         ren = gameObject.GetComponent<MeshRenderer>();
@@ -27,45 +38,44 @@ public class TerrainController : MonoBehaviour {
         taskCont = master.GetComponent<TaskController>();
         bounds = setBounds;
         blockData = setBlockData;
-        Stopwatch timer = new Stopwatch();
 
-        //foreach (KeyValuePair<Vector3, int> data in blockData) {
-        //    CheckForAir(data);
-        //}
-        //UpdateMesh();
-
-        //ThreadWork();
+        // Start Coroutines.
         StartCoroutine(ThreadWork());
-
-        //UnityEngine.Debug.Log(timer.Elapsed);
     }
 
+    // This method updates the mesh and sets the gameobjects to it.
     public void UpdateMesh() {
 
         mesh.Clear();
 
+        // get current mesh data.
         mesh.vertices = newVertices.ToArray();
         mesh.triangles = newTriangles.ToArray();
-        //mesh.uv = newUV.ToArray();
 
+        // Calculate mesh.
         mesh.Optimize();
         mesh.RecalculateNormals();
         mesh.RecalculateBounds();
 
+        // Update the collider mesh.
         col.sharedMesh = null;
         col.sharedMesh = mesh;
 
+        // Set gameobject meshes to new mesh.
         gameObject.GetComponent<MeshFilter>().mesh = mesh;
         gameObject.GetComponent<MeshCollider>().sharedMesh = col.sharedMesh;
 
+        // Set the material.
         Material mat = (Material)Resources.Load("Grass", typeof(Material));
         ren.material = mat;
 
+        // Clear variables.
         newVertices.Clear();
         newUV.Clear();
         newTriangles.Clear();
     }
 
+    // This Coroutine divides the work done into several frames, keeping FPS high.
     public IEnumerator ThreadWork() {
         int ticks = Environment.TickCount;
 
@@ -81,12 +91,13 @@ public class TerrainController : MonoBehaviour {
         bounds.SetActive(false);
     }
 
+    // This method takes data(KeyValuePair<Vector3, int>) and looks to see if there is an air blockType on each face, then adds to the mesh if so.
     private void CheckForAir(KeyValuePair<Vector3, int> data) {
 
         if (data.Value != 0) {
             int val;
 
-            //Up
+            // Up.
             Vector3 alteredKey = data.Key + new Vector3(0, 1, 0);
             if (blockData.TryGetValue(alteredKey, out val)) {
 
@@ -94,35 +105,35 @@ public class TerrainController : MonoBehaviour {
                     FaceUp(new object[] { 1, data.Key, new Vector2(0, 0) });
                 }
             }
-            //Down
+            // Down.
             alteredKey = data.Key + new Vector3(0, -1, 0);
             if (blockData.TryGetValue(alteredKey, out val)) {
                 if (val == 0) {
                     FaceDown(new object[] { 1, data.Key, new Vector2(0, 0) });
                 }
             }
-            //Forward
+            // Forward.
             alteredKey = data.Key + new Vector3(0, 0, 1);
             if (blockData.TryGetValue(alteredKey, out val)) {
                 if (val == 0) {
                     FaceForward(new object[] { 1, data.Key, new Vector2(0, 0) });
                 }
             }
-            //Back
+            // Back.
             alteredKey = data.Key + new Vector3(0, 0, -1);
             if (blockData.TryGetValue(alteredKey, out val)) {
                 if (val == 0) {
                     FaceBack(new object[] { 1, data.Key, new Vector2(0, 0) });
                 }
             }
-            //Right
+            // Right.
             alteredKey = data.Key + new Vector3(1, 0, 0);
             if (blockData.TryGetValue(alteredKey, out val)) {
                 if (val == 0) {
                     FaceRight(new object[] { 1, data.Key, new Vector2(0, 0) });
                 }
             }
-            //Left
+            // Left.
             alteredKey = data.Key + new Vector3(-1, 0, 0);
             if (blockData.TryGetValue(alteredKey, out val)) {
                 if (val == 0) {
@@ -132,15 +143,17 @@ public class TerrainController : MonoBehaviour {
         }
     }
 
+    // Methods used to add a face to the mesh.
+    #region FaceGenerationMethods.
+    // Called to make a face on the mesh on the top of a block :: UP.
     public void FaceUp(object state) {
-        //Debug.Log("FaceUp called.");
         object[] stateAr = state as object[];
-        //Debug.Log("stateArray size: " + stateAr.Length);
+        
         float size = (float)Convert.ToDouble(stateAr[0]);
         Vector3 position = (Vector3)stateAr[1];
         Vector2 texture = (Vector2)stateAr[2];
 
-        //Up
+        // Add mesh vertices.
         lock (newVertices) {
             newVertices.Add(new Vector3(position.x + (size / 2), position.y + (size / 2), position.z + (size / 2)));
             newVertices.Add(new Vector3(position.x + (size / 2), position.y + (size / 2), position.z - (size / 2)));
@@ -148,6 +161,7 @@ public class TerrainController : MonoBehaviour {
             newVertices.Add(new Vector3(position.x - (size / 2), position.y + (size / 2), position.z + (size / 2)));
         }
 
+        // Add mesh triangles.
         lock (newTriangles) {
             newTriangles.Add((squareCount * 4) + 1);
             newTriangles.Add((squareCount * 4) + 2);
@@ -161,12 +175,15 @@ public class TerrainController : MonoBehaviour {
 
     }
 
+    // Called to make a face on the mesh on the bottom of a block :: DOWN.
     public void FaceDown(object state) {
         object[] stateAr = state as object[];
+        
         float size = (float)Convert.ToDouble(stateAr[0]);
         Vector3 position = (Vector3)stateAr[1];
         Vector2 texture = (Vector2)stateAr[2];
-        //Down
+        
+        // Add mesh vertices.
         lock (newVertices) {
             newVertices.Add(new Vector3(position.x + (size / 2), position.y - (size / 2), position.z - (size / 2)));
             newVertices.Add(new Vector3(position.x + (size / 2), position.y - (size / 2), position.z + (size / 2)));
@@ -174,6 +191,7 @@ public class TerrainController : MonoBehaviour {
             newVertices.Add(new Vector3(position.x - (size / 2), position.y - (size / 2), position.z - (size / 2)));
         }
 
+        // Add mesh triangles.
         lock (newTriangles) {
             newTriangles.Add((squareCount * 4));
             newTriangles.Add((squareCount * 4) + 1);
@@ -183,17 +201,17 @@ public class TerrainController : MonoBehaviour {
             newTriangles.Add((squareCount * 4) + 3);
         }
         squareCount++;
-
-        //int ticks = Environment.TickCount;
-        //while (Environment.TickCount - ticks < 2000) ;
-
     }
+
+    // Called to make a face on the mesh on the front of a block :: FORWARD.
     public void FaceForward(object state) {
         object[] stateAr = state as object[];
+        
         float size = (float)Convert.ToDouble(stateAr[0]);
         Vector3 position = (Vector3)stateAr[1];
         Vector2 texture = (Vector2)stateAr[2];
-        //Forward
+        
+        // Add mesh vertices.
         lock (newVertices) {
             newVertices.Add(new Vector3(position.x + (size / 2), position.y - (size / 2), position.z + (size / 2)));
             newVertices.Add(new Vector3(position.x + (size / 2), position.y + (size / 2), position.z + (size / 2)));
@@ -201,6 +219,7 @@ public class TerrainController : MonoBehaviour {
             newVertices.Add(new Vector3(position.x - (size / 2), position.y - (size / 2), position.z + (size / 2)));
         }
 
+        // Add mesh triangles.
         lock (newTriangles) {
             newTriangles.Add((squareCount * 4));
             newTriangles.Add((squareCount * 4) + 1);
@@ -211,17 +230,17 @@ public class TerrainController : MonoBehaviour {
         }
 
         squareCount++;
-
-        //int ticks = Environment.TickCount;
-        //while (Environment.TickCount - ticks < 2000) ;
     }
 
+    // Called to make a face on the mesh on the back of a block :: BACK.
     public void FaceBack(object state) {
         object[] stateAr = state as object[];
+        
         float size = (float)Convert.ToDouble(stateAr[0]);
         Vector3 position = (Vector3)stateAr[1];
         Vector2 texture = (Vector2)stateAr[2];
-        //Back
+        
+        // Add mesh vertices.
         lock (newVertices) {
             newVertices.Add(new Vector3(position.x + (size / 2), position.y + (size / 2), position.z - (size / 2)));
             newVertices.Add(new Vector3(position.x + (size / 2), position.y - (size / 2), position.z - (size / 2)));
@@ -229,6 +248,7 @@ public class TerrainController : MonoBehaviour {
             newVertices.Add(new Vector3(position.x - (size / 2), position.y + (size / 2), position.z - (size / 2)));
         }
 
+        // Add mesh triangles.
         lock (newTriangles) {
             newTriangles.Add((squareCount * 4));
             newTriangles.Add((squareCount * 4) + 1);
@@ -238,17 +258,18 @@ public class TerrainController : MonoBehaviour {
             newTriangles.Add((squareCount * 4) + 3);
         }
 
-        squareCount++;
-
-        //int ticks = Environment.TickCount;
-        //while (Environment.TickCount - ticks < 2000) ;
+        squareCount++;        
     }
+
+    // Called to make a face on the mesh on the top of a block :: RIGHT.
     public void FaceRight(object state) {
         object[] stateAr = state as object[];
+        
         float size = (float)Convert.ToDouble(stateAr[0]);
         Vector3 position = (Vector3)stateAr[1];
         Vector2 texture = (Vector2)stateAr[2];
-        //Right
+        
+        // Add mesh vertices.
         lock (newVertices) {
             newVertices.Add(new Vector3(position.x + (size / 2), position.y + (size / 2), position.z - (size / 2)));
             newVertices.Add(new Vector3(position.x + (size / 2), position.y + (size / 2), position.z + (size / 2)));
@@ -256,6 +277,7 @@ public class TerrainController : MonoBehaviour {
             newVertices.Add(new Vector3(position.x + (size / 2), position.y - (size / 2), position.z - (size / 2)));
         }
 
+        // Add mesh triangles.
         lock (newTriangles) {
             newTriangles.Add((squareCount * 4));
             newTriangles.Add((squareCount * 4) + 1);
@@ -266,17 +288,17 @@ public class TerrainController : MonoBehaviour {
         }
 
         squareCount++;
-
-        //int ticks = Environment.TickCount;
-        //while (Environment.TickCount - ticks < 2000) ;
     }
 
+    // Called to make a face on the mesh on the top of a block :: LEFT.
     public void FaceLeft(object state) {
         object[] stateAr = state as object[];
+        
         float size = (float)Convert.ToDouble(stateAr[0]);
         Vector3 position = (Vector3)stateAr[1];
         Vector2 texture = (Vector2)stateAr[2];
-        //Left
+        
+        // Add mesh vertices.
         lock (newVertices) {
             newVertices.Add(new Vector3(position.x - (size / 2), position.y + (size / 2), position.z + (size / 2)));
             newVertices.Add(new Vector3(position.x - (size / 2), position.y + (size / 2), position.z - (size / 2)));
@@ -284,6 +306,7 @@ public class TerrainController : MonoBehaviour {
             newVertices.Add(new Vector3(position.x - (size / 2), position.y - (size / 2), position.z + (size / 2)));
         }
 
+        // Add mesh triangles.
         lock (newTriangles) {
             newTriangles.Add((squareCount * 4));
             newTriangles.Add((squareCount * 4) + 1);
@@ -294,8 +317,6 @@ public class TerrainController : MonoBehaviour {
         }
 
         squareCount++;
-
-        //int ticks = Environment.TickCount;
-        //while (Environment.TickCount - ticks < 2000) ;
     }
+    #endregion
 }

@@ -1,4 +1,18 @@
-﻿using System;
+﻿/* Purpose: This class has a bundle of tool.
+ * Notable features:
+ *      Can find the closest object with a given tag.
+ *      Can find all of the points inside of a Sphere with peramaters.
+ *      Can find all of the points inside of an Ellipsoid with peramaters.
+ *      Can find all of the points inside of a Cube with peramaters.
+ *      Can return a ceilinged Vector3 with peramaters.
+ *      Can return the master GameObject.
+ * 
+ * Special Notes: N/A.
+ * 
+ * 
+ */
+
+using System;
 using UnityEngine;
 using System.Linq;
 using System.Collections;
@@ -6,6 +20,7 @@ using System.Collections.Generic;
 
 public static class UnityTools {
 
+    // Finds the closest object with a given tag.
     public static GameObject ClosestWithTag(GameObject target, string tag) {
         GameObject value = null;
         GameObject[] objectsWithTag = GameObject.FindGameObjectsWithTag(tag);
@@ -22,6 +37,8 @@ public static class UnityTools {
         return value;
     }
 
+    // Finds all of the points inside of a sphere with peramaters.
+    // radius(int) of sphere, divisor(int) usefull if you only want every 5th or so point using am absolute radius(within this distance), multiplier(int) usefull if you only want every 5th or so point using an abstract radius(this many points).
     public static List<Vector3> PointsInsideSphere(int radius, int divisor, int multiplier) {
         List<Vector3> values = new List<Vector3>();
 
@@ -38,12 +55,14 @@ public static class UnityTools {
         return values;
     }
 
-    public static List<Vector3> PointsInsideEllipse(Vector3 radii, int divisor, Vector3 multiplier) {
+    // Finds all of the points inside of an ellipsoid with peramaters.
+    // radii(Vector3) of ellipse, divisor(Vector3) usefull if you only want every 5th or so point using am absolute radius(within this distance), multiplier(Vector3) usefull if you only want every 5th or so point using an abstract radius(this many points).
+    public static List<Vector3> PointsInsideEllipse(Vector3 radii, Vector3 divisor, Vector3 multiplier) {
         List<Vector3> values = new List<Vector3>();
 
-        for (float i = -radii.x / divisor; i < radii.x / divisor; i++) {
-            for (float j = -radii.y / divisor; j < radii.y / divisor; j++) {
-                for (float k = -radii.z / divisor; k < radii.z / divisor; k++) {
+        for (float i = -radii.x / divisor.x; i < radii.x / divisor.x; i++) {
+            for (float j = -radii.y / divisor.y; j < radii.y / divisor.y; j++) {
+                for (float k = -radii.z / divisor.z; k < radii.z / divisor.z; k++) {
                     if (((i / radii.x) * (i / radii.x) + (j / radii.y) * (j / radii.y) + (k / radii.z) * (k / radii.z)) <= 1) {
                         values.Add(new Vector3(j * multiplier.x, k * multiplier.y, i * multiplier.z));
                     }
@@ -53,6 +72,7 @@ public static class UnityTools {
         return values;
     }
 
+    // Finds the closest angle out of a list of possible to the given direction.
     public static Vector3 ClosestAngle(Vector3 direction, Vector3[] angles) {
         Vector3 value = new Vector3();
         float closestAngl = Mathf.Infinity;
@@ -67,7 +87,9 @@ public static class UnityTools {
         return value;
     }
 
-    public static List<Vector3> PointsInsideVolume(Vector3 length, int divisor, Vector3 multiplier) {
+    // Finds all of the points inside of a cube with peramaters.
+    // Length(Vector3) of cube, divisor(int) usefull if you only want every 5th or so point using am absolute radius(within this distance), multiplier(Vector3) usefull if you only want every 5th or so point using an abstract radius(this many points).
+    public static List<Vector3> PointsInsideCube(Vector3 length, int divisor, Vector3 multiplier) {
         List<Vector3> values = new List<Vector3>();
         for (float i = -length.x / divisor; i < length.x / divisor; i++) {
             for (float j = -length.y / divisor; j < length.y / divisor; j++) {
@@ -79,6 +101,7 @@ public static class UnityTools {
         return values;
     }
 
+    // Returns a ceilinged Vector3 to a given place value.
     public static Vector3 Ceiling(Vector3 position, int places) {
         Vector3 value = new Vector3();
         float x = position.x, y = position.y, z = position.z;
@@ -95,6 +118,7 @@ public static class UnityTools {
         return value;
     }
 
+    // Returns the master GameObject.
     public static GameObject GetMasterController() {
         return GameObject.FindGameObjectWithTag("GameController");
     }

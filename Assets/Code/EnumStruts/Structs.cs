@@ -1,9 +1,17 @@
-﻿using System;
+﻿/* Purpose: This class provides all of the Structs.
+ * 
+ * Special Notes: N/A.
+ * 
+ * Author: Devyn Cyphers; Devcon.
+ */
+
+using System;
 using UnityEngine;
 using System.Collections;
 
 public class Structs {
 
+    // Neighbor struct.
     public struct neighbor {
         public Enums.direction direction;
         public Vector3 position;
@@ -16,6 +24,7 @@ public class Structs {
         }
     }
 
+    // chunkData struct.
     public struct chunkData {
         public GameObject chunk;
         public bool active;
@@ -31,6 +40,7 @@ public class Structs {
         }
     }
 
+    // blockTypes struct.
     public struct blockTypes {
         public int type;
 
