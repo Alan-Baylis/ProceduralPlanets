@@ -13,7 +13,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
-using IO_Tools;
 using DevconTools;
 
 public class ChunkController : MonoBehaviour {
@@ -82,10 +81,19 @@ public class ChunkController : MonoBehaviour {
 
             int blockType = 0;
             Vector3 thisPosition = posiblePosition[i];
-            thisPosition = transform.position+posiblePosition[i];
-            float noisePos = thisPosition.x * thisPosition.x + thisPosition.y * thisPosition.y + thisPosition.z * thisPosition.z;
+            thisPosition = transform.position + posiblePosition[i];
 
-            if (thisPosition.y <= Mathf.RoundToInt((pnng.smoothNoise(noisePos,3,1,2)))) { blockType = 1; }
+            float point1 = (float)pnng.Noise(thisPosition.x+1, thisPosition.y+1, thisPosition.z+1);
+
+            double point2 = point1 + (pnng.Noise(thisPosition.x * 2, thisPosition.y * 2, thisPosition.z * 2) / 2);
+            point2 += pnng.Noise(thisPosition.x * 4, thisPosition.y * 4, thisPosition.z * 4) / 4;
+            point2 += pnng.Noise(thisPosition.x * 16, thisPosition.y * 16, thisPosition.z * 16) / 8;
+            point2 *= 320;
+            point2 = Math.Floor(point2);
+
+            float point3 = (float)point2;
+
+            if (thisPosition.y <= Mathf.RoundToInt(point3)) { blockType = 1; }
 
             thisPosition = posiblePosition[i];
 
@@ -104,11 +112,5 @@ public class ChunkController : MonoBehaviour {
             } else { frameCount++; }
         }
         chunkMesh.GetComponent<TerrainController>().PreGen(blockData, bounds);
-    }
-    
-    // This method Adds this chunks data to the xml save file :: UNDER CONSTRUCTION.
-    void addToSave() {
-        IO_Tools.Save.chunk(transform.position.x, transform.position.y, transform.position.z, gameObject.name);
-        Debug.Log("saved chunk.");
     }
 }

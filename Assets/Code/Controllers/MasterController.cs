@@ -9,6 +9,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
+using DevconTools;
 
 public class MasterController : MonoBehaviour {
 
@@ -45,6 +46,7 @@ public class MasterController : MonoBehaviour {
 
     // This method creates a chunk at the position(vector3) and adds it to the chunkData dictionary.
     public void CreateChunk(Vector3 position) {
+  
         Transform newChunk = Instantiate(chunk, position, Quaternion.identity) as Transform;
         chunkData.Add(position, new Structs.chunkData(newChunk.gameObject, true));
         newChunk.name = "Chunk-" + totalChunks.ToString();
